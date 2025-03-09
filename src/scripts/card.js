@@ -1,52 +1,42 @@
-import { zoomImagePopup, placesList, cardTemplate } from "./index.js";
-import { openPopup } from "./modal.js";
-
 // Функция создания карточки
-export function createCard(cardInfo, removeCardCB, openImageCB, toggleLikeCB) {
+export function createCard(
+  cardInfo,
+  { removeCardCb, openImageCb, toggleLikeCb, cardTemplate } = {}
+) {
+  // Получение базовых элементов
   const card = cardTemplate.content.cloneNode(true);
-
+  // Получение дочерних элементов
+  const cardRemoveButton = card.querySelector(".card__delete-button");
+  const likeButton = card.querySelector(".card__like-button");
   const cardTitle = card.querySelector(".card__title");
+  const cardImg = card.querySelector(".card__image");
+
+  // Настройка изображения
+  cardImg.src = cardInfo.link;
+  cardImg.alt = cardInfo.name;
+
+  // Настройка заголовка
   cardTitle.textContent = cardInfo.name;
 
-  const cardImg = card.querySelector(".card__image");
-  cardImg.setAttribute("src", cardInfo.link);
-  cardImg.setAttribute("alt", cardInfo.name);
-
-  const cardRemoveButton = card.querySelector(".card__delete-button");
-
+  //Добавление обработчиков событий
   cardRemoveButton.addEventListener("click", (event) => {
     const parentCard = event.target.closest("li");
-    removeCardCB(parentCard);
+    removeCardCb(parentCard);
   });
 
-  const likeButton = card.querySelector(".card__like-button");
-
-  likeButton.addEventListener("click", (event) => {
-    const parentCard = event.target.closest("li");
-    toggleLikeCB(parentCard);
+  likeButton.addEventListener("click", () => {
+    toggleLikeCb(likeButton);
   });
 
-  const cardImage = card.querySelector(".card__image");
-  cardImage.addEventListener("click", () => openImageCB(cardInfo));
+  cardImg.addEventListener("click", () => openImageCb(cardInfo));
   return card;
 }
 
 // Функция удаления карточки
 export function removeCard(card) {
-  placesList.removeChild(card);
+  card.remove();
 }
 
-export function openImagePopup(cardInfo) {
-  const popupImage = zoomImagePopup.querySelector(".popup__image");
-  popupImage.setAttribute("src", cardInfo.link);
-  popupImage.setAttribute("alt", cardInfo.name);
-
-  const popupCaption = zoomImagePopup.querySelector(".popup__caption");
-  popupCaption.textContent = cardInfo.name;
-  openPopup(zoomImagePopup);
-}
-
-export function toggleLike(card) {
-  const likeButton = card.querySelector(".card__like-button");
+export function toggleLike(likeButton) {
   likeButton.classList.toggle("card__like-button_is-active");
 }
