@@ -4,8 +4,8 @@ import { initialCards } from "./cards.js";
 import {
   openPopup,
   closePopup,
-  handleOverlayClick,
-  handleKeydown,
+  handleEscClose,
+  setPopupEventListener,
 } from "./modal.js";
 import { createCard, removeCard, toggleLike } from "./card.js";
 
@@ -68,15 +68,6 @@ function openImagePopup(cardInfo) {
   const popupCaption = zoomImagePopup.querySelector(".popup__caption");
   popupCaption.textContent = cardInfo.name;
   openPopup(zoomImagePopup);
-}
-
-window.addEventListener("keydown", handleKeydown);
-
-function setPopupEventListener(popup) {
-  popup.addEventListener("mousedown", handleOverlayClick);
-
-  const closeBtn = popup.querySelector(".popup__close");
-  closeBtn.addEventListener("click", () => closePopup(popup));
 }
 
 document.querySelectorAll(".popup").forEach(setPopupEventListener);
