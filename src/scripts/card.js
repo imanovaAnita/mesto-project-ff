@@ -1,3 +1,6 @@
+import * as api from "./api.js";
+export const MY_ID = "51d4d3967958d9a782c0cf57";
+
 // Функция создания карточки
 export function createCard(
   cardInfo,
@@ -10,6 +13,20 @@ export function createCard(
   const likeButton = card.querySelector(".card__like-button");
   const cardTitle = card.querySelector(".card__title");
   const cardImg = card.querySelector(".card__image");
+  const likeCountEl = card.querySelector(".card__like-count");
+  // переменная со счетчиком лайков
+  const likeCount = cardInfo.likes.length;
+  likeCountEl.textContent = likeCount;
+
+  const hasMyLike = cardInfo.likes.some((user) => user._id === MY_ID);
+
+  if (hasMyLike) {
+    likeButton.classList.add("card__like-button_is-active");
+  }
+  const isMyCard = cardInfo.owner._id === MY_ID;
+  if (!isMyCard) {
+    cardRemoveButton.remove();
+  }
 
   // Настройка изображения
   cardImg.src = cardInfo.link;
@@ -19,13 +36,17 @@ export function createCard(
   cardTitle.textContent = cardInfo.name;
 
   //Добавление обработчиков событий
-  cardRemoveButton.addEventListener("click", (event) => {
-    const parentCard = event.target.closest("li");
-    removeCardCb(parentCard);
-  });
+  if (isMyCard) {
+    cardRemoveButton.addEventListener("click", (event) => {
+      api.removeCard(cardInfo._id).then(() => {
+        const parentCard = event.target.closest("li");
+        removeCardCb(parentCard);
+      });
+    });
+  }
 
   likeButton.addEventListener("click", () => {
-    toggleLikeCb(likeButton);
+    toggleLikeCb(likeButton, cardInfo._id, likeCountEl);
   });
 
   cardImg.addEventListener("click", () => openImageCb(cardInfo));
@@ -37,6 +58,17 @@ export function removeCard(card) {
   card.remove();
 }
 
-export function toggleLike(likeButton) {
+export function toggleLike(likeButton, cardId, likeCountEl) {
   likeButton.classList.toggle("card__like-button_is-active");
+  if (likeButton.classList.contains("card__like-button_is-active")) {
+    api.addLike(cardId).then((res) => {
+      const likeCount = res.likes.length;
+      likeCountEl.textContent = likeCount;
+    });
+  } else {
+    api.deleteLike(cardId).then((res) => {
+      const likeCount = res.likes.length;
+      likeCountEl.textContent = likeCount;
+    });
+  }
 }

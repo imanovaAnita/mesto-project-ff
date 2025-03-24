@@ -1,0 +1,17 @@
+.popup__error {
+  display: block;
+  color: red;
+  font-size: 12px;
+  opacity: 0;
+  pointer-events: none;
+  height: 34px;
+}
+
+
+.name-input-error {}
+
+.description-input-error {}
+
+.place-name-input-error {}
+
+.link-input-error {}
