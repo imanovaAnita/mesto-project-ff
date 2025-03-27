@@ -8,21 +8,22 @@ const config = {
 
 export function getUserInfo() {
   return fetch(`${config.baseUrl}/users/me`, {
-    headers: config.headers
+    headers: config.headers,
   })
-    .then(res => {
+    .then((res) => {
       if (res.ok) {
         return res.json();
       }
-      return Promise.reject(`Ошибка: ${res.status}`)
-    })    .catch((err) => {
+      return Promise.reject(`Ошибка: ${res.status}`);
+    })
+    .catch((err) => {
       console.log(err);
     });
 }
 
 export function getCards() {
   return fetch(`${config.baseUrl}/cards`, {
-    headers: config.headers
+    headers: config.headers,
   })
     .then((res) => {
       if (res.ok) {
@@ -62,7 +63,7 @@ export function addCard({ name, link }) {
     body: JSON.stringify({
       name,
       link,
-    })
+    }),
   })
     .then((res) => {
       if (res.ok) {

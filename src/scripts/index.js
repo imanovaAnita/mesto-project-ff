@@ -10,6 +10,7 @@ Promise.all([api.getUserInfo(), api.getCards()]).then(
     profileTitle.textContent = userInfoResp.name;
     profileImage.style.backgroundImage = `url(${userInfoResp.avatar})`;
     profileDescription.textContent = userInfoResp.about;
+    window.userId = userInfoResp._id;
 
     // Отрисовка карточек
     cardsResp.forEach((cardInfo) => {
@@ -17,6 +18,7 @@ Promise.all([api.getUserInfo(), api.getCards()]).then(
         removeCardCb: removeCard,
         openImageCb: openImagePopup,
         toggleLikeCb: toggleLike,
+        userId: window.userId,
         cardTemplate,
       });
       placesList.appendChild(card);
@@ -38,6 +40,7 @@ export const profileTitle = document.querySelector(".profile__title");
 export const profileDescription = document.querySelector(
   ".profile__description"
 );
+const popupCaption = zoomImagePopup.querySelector(".popup__caption");
 
 // Формы
 const editProfileFormElement = document.querySelector(
@@ -61,7 +64,9 @@ const cardNameInput = newPlaceFormElement.querySelector(
 const cardUrlInput = newPlaceFormElement.querySelector(
   ".popup__input_type_url"
 );
-const avatarUrlInput = editAvatarFormElement.querySelector('.popup__input_type_avatar_url');
+const avatarUrlInput = editAvatarFormElement.querySelector(
+  ".popup__input_type_avatar_url"
+);
 
 export const placesList = document.querySelector(".places__list");
 
@@ -71,9 +76,8 @@ const profileAddButton = document.querySelector(".profile__add-button");
 const editProfileSubmitButton =
   editProfileFormElement.querySelector(".popup__button");
 const addCardSubmitButton = newPlaceFormElement.querySelector(".popup__button");
-const editAvatarSubmitButton = editAvatarFormElement.querySelector(
-  ".popup__button"
-);
+const editAvatarSubmitButton =
+  editAvatarFormElement.querySelector(".popup__button");
 // Картинка попапа
 const popupImage = zoomImagePopup.querySelector(".popup__image");
 
@@ -86,13 +90,12 @@ profileImage.addEventListener("click", openEditAvatarPopup);
 
 editProfileFormElement.addEventListener("submit", handleEditProfileFormSubmit);
 newPlaceFormElement.addEventListener("submit", handleNewPlaceFormSubmit);
-editAvatarFormElement.addEventListener('submit', handleEditAvatarFormSubmit)
+editAvatarFormElement.addEventListener("submit", handleEditAvatarFormSubmit);
 
 function openImagePopup(cardInfo) {
   popupImage.setAttribute("src", cardInfo.link);
   popupImage.setAttribute("alt", cardInfo.name);
 
-  const popupCaption = zoomImagePopup.querySelector(".popup__caption");
   popupCaption.textContent = cardInfo.name;
   openPopup(zoomImagePopup);
 }
@@ -126,74 +129,50 @@ function openEditAvatarPopup() {
   openPopup(avatarPopup);
 }
 
-function saveNewProfileData() {
-  return (
-    api
-      .editProfile({ name: nameInput.value, about: jobInput.value })
-      // меняем данные профиля в DOM только после сохранения их на сервер
-      .then(() => {
-        profileTitle.textContent = nameInput.value;
-        profileDescription.textContent = jobInput.value;
-      })
-  );
-}
-
 function handleEditProfileFormSubmit(evt) {
   evt.preventDefault();
   // до отправки на сервер
   editProfileSubmitButton.textContent = "Сохранение...";
   editProfileSubmitButton.style.pointerEvents = "none";
-  saveNewProfileData().then(() => {
-    editProfileSubmitButton.textContent = "Сохранить";
-    editProfileSubmitButton.style.pointerEvents = "all";
-    // после отправки на сервер
-    closePopup(profileEditingPopup);
-  });
-}
-
-function saveNewCardData() {
-  return (
-    api
-      .addCard({ name: cardNameInput.value, link: cardUrlInput.value })
-      // меняем данные профиля в DOM только после сохранения их на сервер
-      .then(() => {
-        return api.getCards().then((cardsResp) => {
-          const cards = cardsResp.map((cardInfo) => {
-            return createCard(cardInfo, {
-              removeCardCb: removeCard,
-              openImageCb: openImagePopup,
-              toggleLikeCb: toggleLike,
-              cardTemplate,
-            });
-          });
-
-          placesList.replaceChildren(...cards);
-        });
-      })
-  );
+  api
+    .editProfile({ name: nameInput.value, about: jobInput.value })
+    // меняем данные профиля в DOM только после сохранения их на сервер
+    .then(() => {
+      profileTitle.textContent = nameInput.value;
+      profileDescription.textContent = jobInput.value;
+    })
+    .finally(() => {
+      editProfileSubmitButton.textContent = "Сохранить";
+      editProfileSubmitButton.style.pointerEvents = "all";
+      // после отправки на сервер
+      closePopup(profileEditingPopup);
+    });
 }
 
 function handleNewPlaceFormSubmit(evt) {
   evt.preventDefault();
   addCardSubmitButton.textContent = "Создание...";
   addCardSubmitButton.style.pointerEvents = "none";
-  saveNewCardData().then(() => {
-    addCardSubmitButton.textContent = "Создать";
-    addCardSubmitButton.style.pointerEvents = "all";
-    resetForm(newPlaceFormElement);
-    closePopup(newMestoPopup);
-  });
-}
+  api
+    .addCard({ name: cardNameInput.value, link: cardUrlInput.value })
+    // меняем данные профиля в DOM только после сохранения их на сервер
+    .then((cardInfo) => {
+      const newCard = createCard(cardInfo, {
+        removeCardCb: removeCard,
+        openImageCb: openImagePopup,
+        toggleLikeCb: toggleLike,
+        userId: window.userId,
+        cardTemplate,
+      });
 
-function saveEditAvatarData() {
-  return (
-    api
-      .editAvatar(avatarUrlInput.value)
-      // меняем данные профиля в DOM только после сохранения их на сервер
-      .then(() => {
-        profileImage.style.backgroundImage = `url(${avatarUrlInput.value})`;
-      })
-  );
+      placesList.prepend(newCard);
+    })
+    .finally(() => {
+      addCardSubmitButton.textContent = "Создать";
+      addCardSubmitButton.style.pointerEvents = "all";
+      resetForm(newPlaceFormElement);
+      closePopup(newMestoPopup);
+    });
 }
 
 function handleEditAvatarFormSubmit(evt) {
@@ -201,12 +180,18 @@ function handleEditAvatarFormSubmit(evt) {
   // до отправки на сервер
   editAvatarSubmitButton.textContent = "Сохранение...";
   editAvatarSubmitButton.style.pointerEvents = "none";
-  saveEditAvatarData().then(() => {
-    editAvatarSubmitButton.textContent = "Сохранить";
-    editAvatarSubmitButton.style.pointerEvents = "all";
-    // после отправки на сервер
-    closePopup(avatarPopup);
-  });
+  api
+    .editAvatar(avatarUrlInput.value)
+    // меняем данные профиля в DOM только после сохранения их на сервер
+    .then(() => {
+      profileImage.style.backgroundImage = `url(${avatarUrlInput.value})`;
+    })
+    .finally(() => {
+      editAvatarSubmitButton.textContent = "Сохранить";
+      editAvatarSubmitButton.style.pointerEvents = "all";
+      // после отправки на сервер
+      closePopup(avatarPopup);
+    });
 }
 
 // Конфигурация валидации
