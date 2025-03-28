@@ -1,5 +1,4 @@
 import * as api from "./api.js";
-export const MY_ID = "51d4d3967958d9a782c0cf57";
 
 // Функция создания карточки
 export function createCard(
@@ -7,7 +6,7 @@ export function createCard(
   { removeCardCb, openImageCb, toggleLikeCb, cardTemplate, userId } = {}
 ) {
   // Получение базовых элементов
-  const card = cardTemplate.content.querySelector('.card').cloneNode(true);
+  const card = cardTemplate.content.querySelector(".card").cloneNode(true);
   // Получение дочерних элементов
   const cardRemoveButton = card.querySelector(".card__delete-button");
   const likeButton = card.querySelector(".card__like-button");
@@ -18,7 +17,6 @@ export function createCard(
   const likeCount = cardInfo.likes.length;
   likeCountEl.textContent = likeCount;
 
-  
   const hasMyLike = cardInfo.likes.some((user) => user._id === userId);
 
   if (hasMyLike) {
@@ -41,6 +39,9 @@ export function createCard(
     cardRemoveButton.addEventListener("click", () => {
       api.removeCard(cardInfo._id).then(() => {
         removeCardCb(card);
+      })
+      .catch((err) => {
+        console.log(err);
       });
     });
   }
@@ -61,14 +62,24 @@ export function removeCard(card) {
 export function toggleLike(likeButton, cardId, likeCountEl) {
   likeButton.classList.toggle("card__like-button_is-active");
   if (likeButton.classList.contains("card__like-button_is-active")) {
-    api.addLike(cardId).then((res) => {
-      const likeCount = res.likes.length;
-      likeCountEl.textContent = likeCount;
-    });
+    api
+      .addLike(cardId)
+      .then((res) => {
+        const likeCount = res.likes.length;
+        likeCountEl.textContent = likeCount;
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   } else {
-    api.deleteLike(cardId).then((res) => {
-      const likeCount = res.likes.length;
-      likeCountEl.textContent = likeCount;
-    });
+    api
+      .deleteLike(cardId)
+      .then((res) => {
+        const likeCount = res.likes.length;
+        likeCountEl.textContent = likeCount;
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   }
 }

@@ -16,9 +16,6 @@ export function getUserInfo() {
       }
       return Promise.reject(`Ошибка: ${res.status}`);
     })
-    .catch((err) => {
-      console.log(err);
-    });
 }
 
 export function getCards() {
@@ -31,9 +28,6 @@ export function getCards() {
       }
       return Promise.reject(`Ошибка: ${res.status}`);
     })
-    .catch((err) => {
-      console.log(err);
-    });
 }
 
 export function editProfile({ name, about }) {
@@ -51,9 +45,6 @@ export function editProfile({ name, about }) {
       }
       return Promise.reject(`Ошибка: ${res.status}`);
     })
-    .catch((err) => {
-      console.log(err);
-    });
 }
 
 export function addCard({ name, link }) {
@@ -71,9 +62,6 @@ export function addCard({ name, link }) {
       }
       return Promise.reject(`Ошибка: ${res.status}`);
     })
-    .catch((err) => {
-      console.log(err);
-    });
 }
 
 export function removeCard(cardId) {
@@ -87,9 +75,6 @@ export function removeCard(cardId) {
       }
       return Promise.reject(`Ошибка: ${res.status}`);
     })
-    .catch((err) => {
-      console.log(err);
-    });
 }
 
 export function addLike(cardId) {
@@ -103,9 +88,6 @@ export function addLike(cardId) {
       }
       return Promise.reject(`Ошибка: ${res.status}`);
     })
-    .catch((err) => {
-      console.log(err);
-    });
 }
 
 export function deleteLike(cardId) {
@@ -119,9 +101,6 @@ export function deleteLike(cardId) {
       }
       return Promise.reject(`Ошибка: ${res.status}`);
     })
-    .catch((err) => {
-      console.log(err);
-    });
 }
 
 export function editAvatar(avatar) {
@@ -136,7 +115,4 @@ export function editAvatar(avatar) {
       }
       return Promise.reject(`Ошибка: ${res.status}`);
     })
-    .catch((err) => {
-      console.log(err);
-    });
 }

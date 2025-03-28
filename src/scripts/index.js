@@ -4,8 +4,8 @@ import { createCard, removeCard, toggleLike } from "./card.js";
 import { clearValidation, enableValidation } from "./validation.js";
 import * as api from "./api.js";
 
-Promise.all([api.getUserInfo(), api.getCards()]).then(
-  ([userInfoResp, cardsResp]) => {
+Promise.all([api.getUserInfo(), api.getCards()])
+  .then(([userInfoResp, cardsResp]) => {
     // Установка профиля
     profileTitle.textContent = userInfoResp.name;
     profileImage.style.backgroundImage = `url(${userInfoResp.avatar})`;
@@ -23,8 +23,10 @@ Promise.all([api.getUserInfo(), api.getCards()]).then(
       });
       placesList.appendChild(card);
     });
-  }
-);
+  })
+  .catch((err) => {
+    console.log(err);
+  });
 
 // Добавляем логотип
 const profileImage = document.querySelector(".profile__image");
@@ -140,12 +142,14 @@ function handleEditProfileFormSubmit(evt) {
     .then(() => {
       profileTitle.textContent = nameInput.value;
       profileDescription.textContent = jobInput.value;
+      closePopup(profileEditingPopup);
+    })
+    .catch((err) => {
+      console.log(err);
     })
     .finally(() => {
       editProfileSubmitButton.textContent = "Сохранить";
       editProfileSubmitButton.style.pointerEvents = "all";
-      // после отправки на сервер
-      closePopup(profileEditingPopup);
     });
 }
 
@@ -166,12 +170,15 @@ function handleNewPlaceFormSubmit(evt) {
       });
 
       placesList.prepend(newCard);
+      resetForm(newPlaceFormElement);
+      closePopup(newMestoPopup);
+    })
+    .catch((err) => {
+      console.log(err);
     })
     .finally(() => {
       addCardSubmitButton.textContent = "Создать";
       addCardSubmitButton.style.pointerEvents = "all";
-      resetForm(newPlaceFormElement);
-      closePopup(newMestoPopup);
     });
 }
 
@@ -185,12 +192,15 @@ function handleEditAvatarFormSubmit(evt) {
     // меняем данные профиля в DOM только после сохранения их на сервер
     .then(() => {
       profileImage.style.backgroundImage = `url(${avatarUrlInput.value})`;
+      // после отправки на сервер
+      closePopup(avatarPopup);
+    })
+    .catch((err) => {
+      console.log(err);
     })
     .finally(() => {
       editAvatarSubmitButton.textContent = "Сохранить";
       editAvatarSubmitButton.style.pointerEvents = "all";
-      // после отправки на сервер
-      closePopup(avatarPopup);
     });
 }
 
